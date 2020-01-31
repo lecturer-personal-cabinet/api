@@ -16,4 +16,4 @@ jobs:
     - name: Run tests
       run: sbt test
     - name: Build artifacts
-      run: sbt build
+      run: sbt dist
