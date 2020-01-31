@@ -7,8 +7,7 @@ EXPOSE 8802
 EXPOSE 9902
 EXPOSE 9000
 
-ADD ./target /
-WORKDIR ./universal
+ADD ./target/universal/api-0.1.zip /
 
 RUN unzip api-0.1.zip
 RUN mv api-0.1 api
