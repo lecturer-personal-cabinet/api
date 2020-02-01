@@ -2,6 +2,7 @@ package com.lpc.wiring
 
 import akka.actor.ActorSystem
 import cats.effect.{ContextShift, IO}
+import com.lpc.controllers.{AuthenticationController, PingController}
 import com.lpc.database.{DatabaseManager, SlickDatabaseManager}
 import com.lpc.database.dao.{PasswordDao, SlickPasswordDao}
 import com.lpc.services.auth.{DefaultEnv, UserService, UserServiceImpl}
@@ -23,7 +24,6 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
 
 trait SilhouetteModule extends DaoModule with BuiltInComponents {
   import com.softwaremill.macwire._
-  import cats.implicits._
 
   def configuration: Configuration
 

@@ -16,9 +16,9 @@ class LpcApplicationLoader extends ApplicationLoader {
 
 class LpcComponent (context: Context) extends BuiltInComponentsFromContext(context)
   with AssetsComponents
-  with I18nComponents
   with SilhouetteModule
-  with ControllerModule {
+  with I18nComponents {
+
   LoggerConfigurator(context.environment.classLoader).foreach {
     _.configure(context.environment, context.initialConfiguration, Map.empty)
   }
@@ -28,8 +28,8 @@ class LpcComponent (context: Context) extends BuiltInComponentsFromContext(conte
     wire[Routes]
   }
 
-  val PingController: PingController = wire[PingController]
-  val SignUpController: AuthenticationController = wire[AuthenticationController]
+  lazy val PingController: PingController = wire[PingController]
+  lazy val SignUpController: AuthenticationController = wire[AuthenticationController]
 
   override def httpFilters: Seq[EssentialFilter] = Seq.empty[EssentialFilter]
 }
