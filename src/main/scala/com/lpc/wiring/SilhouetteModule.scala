@@ -65,8 +65,7 @@ trait SilhouetteModule extends DaoModule with BuiltInComponents {
   lazy val unsecuredAction: UnsecuredAction = wire[DefaultUnsecuredAction]
   lazy val userAwareAction: UserAwareAction = wire[DefaultUserAwareAction]
 
-  lazy val passwordDao: PasswordDao = wire[SlickPasswordDao]
-  lazy val authInfoRepository = new DelegableAuthInfoRepository(passwordDao)
+  lazy val authInfoRepository = new DelegableAuthInfoRepository(PasswordDAO)
   lazy val bCryptPasswordHasher: PasswordHasher = new BCryptPasswordHasher
   lazy val passwordHasherRegistry: PasswordHasherRegistry = new PasswordHasherRegistry(bCryptPasswordHasher)
 

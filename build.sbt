@@ -29,8 +29,6 @@ libraryDependencies ++= Seq(
   "com.softwaremill.macwire" %% "util" % macwireWiringVersion,
   "com.softwaremill.macwire" %% "proxy" % macwireWiringVersion,
 
-  "org.reactivemongo" %% "play2-reactivemongo"  % reactiveMongoVer,
-//
   "com.mohiva" %% "play-silhouette" % silhouetteVer,
   "com.mohiva" %% "play-silhouette-password-bcrypt" % silhouetteVer,
   "com.mohiva" %% "play-silhouette-crypto-jca" % silhouetteVer,

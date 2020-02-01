@@ -9,7 +9,6 @@ import javax.inject.Inject
 import play.api.i18n.I18nSupport
 import play.api.libs.json.{Format, Json}
 import play.api.mvc.ControllerComponents
-import slick.dbio.DBIO
 
 import scala.concurrent.{ExecutionContext, Future}
 
