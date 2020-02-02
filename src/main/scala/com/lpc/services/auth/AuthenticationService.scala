@@ -2,10 +2,10 @@ package com.lpc.services.auth
 
 import cats.Monad
 import cats.effect.{ContextShift, IO}
-import com.lpc.services.auth.AuthenticationService.{AlreadyExists, SignUpFailedResponse, SignUpResultData, SignUpSuccessResponse}
+import com.lpc.services.auth.AuthenticationService._
 import com.lpc.services.user.{SystemUser, UserService}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
-import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
+import com.mohiva.play.silhouette.api.util.{Credentials, PasswordHasherRegistry}
 import com.mohiva.play.silhouette.api.{LoginEvent, LoginInfo, SignUpEvent, Silhouette}
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import javax.inject.Inject
@@ -21,14 +21,19 @@ trait AuthenticationService[F[_]] {
              firstName: String,
              lastName: String)
             (implicit request: RequestHeader): Future[Either[SignUpFailedResponse, SignUpSuccessResponse]]
+
+  def signInCredentials(credentials: Credentials)
+                       (implicit request: RequestHeader): Future[Either[SignInFailedResponse, SignInSuccessResponse]]
 }
 
-class AuthenticationServiceImpl[F[_]: Monad] @Inject()(userService: UserService,
-                                                       passwordHasherRegistry: PasswordHasherRegistry,
-                                                       authInfoRepository: AuthInfoRepository,
-                                                       silhouette: Silhouette[DefaultEnv])
-                                                      (implicit cs: ContextShift[IO])
+class AuthenticationServiceImpl[F[_] : Monad] @Inject()(userService: UserService,
+                                                        passwordHasherRegistry: PasswordHasherRegistry,
+                                                        authInfoRepository: AuthInfoRepository,
+                                                        credentialsProvider: CredentialsProvider,
+                                                        silhouette: Silhouette[DefaultEnv])
+                                                       (implicit cs: ContextShift[IO])
   extends AuthenticationService[F] {
+
   import cats.implicits._
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -60,13 +65,45 @@ class AuthenticationServiceImpl[F[_]: Monad] @Inject()(userService: UserService,
       case Some(_) => Future.successful(AlreadyExists.asLeft)
     }
   }
+
+  override def signInCredentials(credentials: Credentials)
+                                (implicit request: RequestHeader): Future[Either[SignInFailedResponse, SignInSuccessResponse]] = {
+    credentialsProvider
+      .authenticate(credentials)
+      .flatMap { loginInfo =>
+        userService.retrieve(loginInfo).flatMap {
+          case Some(user) =>
+            silhouette.env.authenticatorService
+              .create(loginInfo)
+              .map(authenticator => authenticator)
+              .flatMap { authenticator =>
+                silhouette.env.eventBus.publish(LoginEvent(user, request))
+                silhouette.env.authenticatorService
+                  .init(authenticator)
+                  .map(token => SignInResultData(token, authenticator.expirationDateTime).asRight)
+              }
+          case None => Future.successful(CouldNotFindUser.asLeft)
+        }
+      }
+  }
 }
 
 object AuthenticationService {
+
   sealed trait SignUpSuccessResponse
-  case class SignUpResultData(token: DefaultEnv#A#Value, expiresOn: DateTime) extends SignUpSuccessResponse
 
   sealed trait SignUpFailedResponse
+
+  sealed trait SignInSuccessResponse
+
+  sealed trait SignInFailedResponse
+
+  case class SignUpResultData(token: DefaultEnv#A#Value, expiresOn: DateTime) extends SignUpSuccessResponse
+
   case object AlreadyExists extends SignUpFailedResponse
+
+  case class SignInResultData(token: DefaultEnv#A#Value, expiresOn: DateTime) extends SignInSuccessResponse
+
+  case object CouldNotFindUser extends SignInFailedResponse
 
 }
