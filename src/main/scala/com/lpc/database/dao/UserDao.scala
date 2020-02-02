@@ -1,17 +1,21 @@
 package com.lpc.database.dao
 
+import cats.implicits._
 import com.lpc.database.mapping.{LoginInfoTable, SystemUserEntity, _}
-import com.mohiva.play.silhouette.api.LoginInfo
 import slick.dbio._
 
 trait UserDao[DB[_]] {
   def retrieve(loginInfo: LoginInfoEntity): DB[Option[SystemUserEntity]]
+
   def save(user: SystemUserEntity, loginInfo: LoginInfoEntity): DB[SystemUserEntity]
+
   def retrieveLoginInfo(loginInfo: LoginInfoEntity): DB[Option[LoginInfoEntity]]
+
   def insertLoginInfo(dbLoginInfo: LoginInfoEntity): DB[LoginInfoEntity]
 }
 
 class SlickUserDao extends UserDao[DBIO] {
+
   import slick.jdbc.PostgresProfile.api._
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,10 +38,12 @@ class SlickUserDao extends UserDao[DBIO] {
       .result
       .headOption
 
-   override def insertLoginInfo(dbLoginInfo: LoginInfoEntity): DBIO[LoginInfoEntity] =
+  override def insertLoginInfo(dbLoginInfo: LoginInfoEntity): DBIO[LoginInfoEntity] =
     LoginInfoTable
+      .map(li => (li.providerId, li.providerKey))
       .returning(LoginInfoTable.map(_.id))
-      .into((info, id) => info.copy(id = Some(id))) += dbLoginInfo
+      .+=((dbLoginInfo.providerID, dbLoginInfo.providerKey))
+      .map(newId => dbLoginInfo.copy(id = newId.some))
 
   override def save(user: SystemUserEntity, loginInfo: LoginInfoEntity): DBIO[SystemUserEntity] = {
     val loginInfoAction = {
@@ -51,9 +57,12 @@ class SlickUserDao extends UserDao[DBIO] {
     }
 
     (for {
-      idValue <- SystemUserTable.returning(SystemUserTable.map(_.id)).insertOrUpdate(user)
+      idValue <- SystemUserTable
+        .map(u => (u.firstName, u.lastName, u.email, u.avatarURL, u.activated))
+        .returning(SystemUserTable.map(_.id))
+        .+=((user.firstName, user.lastName, user.email, user.avatarURL, user.activated))
       loginInfo <- loginInfoAction
-      _ <- UserLoginInfoTable += UserInfoEntity(idValue.get, loginInfo.id.get)
+      _ <- UserLoginInfoTable += UserInfoEntity(idValue, loginInfo.id.get)
     } yield ())
       .transactionally
       .map(_ => user)

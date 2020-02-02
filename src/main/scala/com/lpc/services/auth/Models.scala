@@ -1,19 +1,20 @@
 package com.lpc.services.auth
 
-import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
-import play.api.libs.json.{Json, _}
+import org.joda.time.DateTime
+import play.api.libs.json.{JsObject, Json, OWrites}
 
-import scala.util.{Failure, Success, Try}
+case class Token(token: String, expiresOn: DateTime)
 
-case class SystemUser(id: Option[Long],
-                      loginInfo: LoginInfo,
-                      email: String,
-                      firstName: String,
-                      lastName: String,
-                      avatarUrl: Option[String],
-                      activated: Boolean) extends Identity
+object Token {
 
-object SystemUser {
-  implicit val fmt: Format[SystemUser] = Json.format
+  implicit object TokenWrites extends OWrites[Token] {
+    def writes(token: Token): JsObject = {
+      val json = Json.obj(
+        "token" -> token.token,
+        "expiresOn" -> token.expiresOn.toString
+      )
+      json
+    }
+  }
+
 }
-

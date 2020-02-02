@@ -1,6 +1,5 @@
-package com.lpc.services.auth
+package com.lpc.services.user
 
-import cats.Monad
 import cats.effect.IO
 import com.lpc.database.DatabaseManager
 import com.lpc.database.dao.{PasswordDao, UserDao}

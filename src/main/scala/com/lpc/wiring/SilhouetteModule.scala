@@ -2,10 +2,9 @@ package com.lpc.wiring
 
 import akka.actor.ActorSystem
 import cats.effect.{ContextShift, IO}
-import com.lpc.controllers.{AuthenticationController, PingController}
 import com.lpc.database.{DatabaseManager, SlickDatabaseManager}
-import com.lpc.database.dao.{PasswordDao, SlickPasswordDao}
-import com.lpc.services.auth.{DefaultEnv, UserService, UserServiceImpl}
+import com.lpc.services.auth.{AuthenticationService, AuthenticationServiceImpl, DefaultEnv}
+import com.lpc.services.user.{UserService, UserServiceImpl}
 import com.mohiva.play.silhouette.api.actions._
 import com.mohiva.play.silhouette.api.crypto.Base64AuthenticatorEncoder
 import com.mohiva.play.silhouette.api.services.AuthenticatorService
@@ -32,6 +31,7 @@ trait SilhouetteModule extends DaoModule with BuiltInComponents {
   lazy val DbManager: DatabaseManager[IO, DBIO] = wire[SlickDatabaseManager[IO, DBIO]]
 
   lazy val userService: UserService = wire[UserServiceImpl[DBIO]]
+  lazy val authService: AuthenticationService[IO] = wire[AuthenticationServiceImpl[IO]]
 
   lazy val bpDefault: BodyParsers.Default = wire[BodyParsers.Default]
 

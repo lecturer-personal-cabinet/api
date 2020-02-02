@@ -1,29 +1,35 @@
 package com.lpc.controllers
 
 
+import cats.effect.IO
 import com.lpc.controllers.AuthenticationController.SignUpRequest
-import com.lpc.services.auth.UserService
+import com.lpc.services.auth.AuthenticationService.{AlreadyExists, SignUpResultData}
+import com.lpc.services.auth.{AuthenticationService, DefaultEnv, Token}
+import com.lpc.services.user.UserService
 import com.mohiva.play.silhouette.api._
-import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import javax.inject.Inject
 import play.api.i18n.I18nSupport
 import play.api.libs.json.{Format, Json}
 import play.api.mvc.ControllerComponents
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class AuthenticationController @Inject()(components: ControllerComponents,
-                                         userService: UserService)
+                                         silhouette: Silhouette[DefaultEnv],
+                                         userService: UserService,
+                                         authenticationService: AuthenticationService[IO])
                                         (implicit ex: ExecutionContext)
   extends LpcController(components)
     with I18nSupport {
 
-  def signUp = jsonAsyncPost[SignUpRequest] { case (_, request) =>
-    println("Sign up request: " + request)
-    val loginInfo = LoginInfo(CredentialsProvider.ID, request.identifier)
-    userService.retrieve(loginInfo).flatMap {
-      case None => Future.successful(jsonOk("Not exists"))
-      case Some(_) => Future.successful(jsonOk("Exists"))
+  def signUp = jsonAsyncPost[SignUpRequest] { case (rh, request) =>
+    authenticationService.signUp(request.identifier,
+      request.password,
+      request.email,
+      request.firstName,
+      request.lastName)(rh).map {
+      case Left(AlreadyExists) => jsonFail(BadRequest)
+      case Right(data: SignUpResultData) => jsonOk(Token(token = data.token, expiresOn = data.expiresOn))
     }
   }
 }

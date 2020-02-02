@@ -1,11 +1,11 @@
-package com.lpc.services.auth
+package com.lpc.services.user
 
-import com.lpc.database.mapping.{LoginInfoEntity, SystemUserEntity}
+import com.lpc.database.mapping.{EntityKey, LoginInfoEntity, SystemUserEntity}
 import com.mohiva.play.silhouette.api.LoginInfo
 
 object UserMapper {
   def toDto(entity: SystemUserEntity, loginInfo: LoginInfoEntity) = SystemUser(
-    id = entity.id,
+    id = entity.id.map(_.value),
     loginInfo = LoginInfo(loginInfo.providerID, loginInfo.providerKey),
     email = entity.email,
     firstName = entity.firstName,
@@ -14,7 +14,7 @@ object UserMapper {
     activated = entity.activated)
 
   def toEntity(dto: SystemUser) = SystemUserEntity (
-    id = dto.id,
+    id = dto.id.map(id => EntityKey(id)),
     firstName = dto.firstName,
     lastName = dto.lastName,
     email = dto.email,

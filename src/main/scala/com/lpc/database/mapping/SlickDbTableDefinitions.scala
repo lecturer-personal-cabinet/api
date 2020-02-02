@@ -7,7 +7,7 @@ object SlickDbTableDefinitions {
   import slick.jdbc.PostgresProfile.api._
 
   class Users(tag: Tag) extends Table[SystemUserEntity](tag, "system_user") {
-    def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def id: Rep[EntityKey] = column[EntityKey]("user_id", O.PrimaryKey)
 
     def firstName: Rep[String] = column[String]("first_name")
 
@@ -23,7 +23,7 @@ object SlickDbTableDefinitions {
   }
 
   class LoginInfos(tag: Tag) extends Table[LoginInfoEntity](tag, "login_info") {
-    def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def id: Rep[EntityKey] = column[EntityKey]("login_info_id", O.PrimaryKey)
 
     def providerId: Rep[String] = column[String]("provider_id")
 
@@ -33,9 +33,9 @@ object SlickDbTableDefinitions {
   }
 
   class UserLoginInfos(tag: Tag) extends Table[UserInfoEntity](tag, "user_login_info") {
-    def userId: Rep[Long] = column[Long]("user_id")
+    def userId: Rep[EntityKey] = column[EntityKey]("user_id")
 
-    def loginInfoId: Rep[Long] = column[Long]("login_info_id")
+    def loginInfoId: Rep[EntityKey] = column[EntityKey]("login_info_id")
 
     def * : ProvenShape[UserInfoEntity] = (userId, loginInfoId) <> (UserInfoEntity.tupled, UserInfoEntity.unapply)
   }
@@ -47,7 +47,7 @@ object SlickDbTableDefinitions {
 
     def salt: Rep[Option[String]] = column[Option[String]]("salt")
 
-    def loginInfoId: Rep[Long] = column[Long]("login_info_id")
+    def loginInfoId: Rep[EntityKey] = column[EntityKey]("login_info_id")
 
     def * : ProvenShape[PasswordInfoEntity] = (hasher, password, salt, loginInfoId) <> (PasswordInfoEntity.tupled, PasswordInfoEntity.unapply)
   }

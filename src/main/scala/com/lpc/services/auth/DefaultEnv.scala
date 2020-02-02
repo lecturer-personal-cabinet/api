@@ -1,5 +1,6 @@
 package com.lpc.services.auth
 
+import com.lpc.services.user.SystemUser
 import com.mohiva.play.silhouette.api.Env
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
 

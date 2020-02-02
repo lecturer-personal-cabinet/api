@@ -1,20 +1,24 @@
 package com.lpc.database.mapping
 
-case class SystemUserEntity(id: Option[Long],
+import slick.lifted.MappedTo
+
+final case class EntityKey(value: String) extends AnyVal with MappedTo[String]
+
+case class SystemUserEntity(id: Option[EntityKey],
                             firstName: String,
                             lastName: String,
                             email: String,
                             avatarURL: Option[String],
                             activated: Boolean)
 
-case class LoginInfoEntity(id: Option[Long],
+case class LoginInfoEntity(id: Option[EntityKey],
                            providerID: String,
                            providerKey: String)
 
-case class UserInfoEntity(userID: Long,
-                          loginInfoId: Long)
+case class UserInfoEntity(userID: EntityKey,
+                          loginInfoId: EntityKey)
 
 case class PasswordInfoEntity(hasher: String,
                               password: String,
                               salt: Option[String],
-                              loginInfoId: Long)
+                              loginInfoId: EntityKey)
