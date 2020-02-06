@@ -21,10 +21,10 @@ class AuthenticationController @Inject()(components: ControllerComponents,
                                          userService: UserService,
                                          authenticationService: AuthenticationService[IO])
                                         (implicit ex: ExecutionContext)
-  extends LpcController(components)
+  extends LpcController(components, silhouette)
     with I18nSupport {
 
-  def signUp = jsonAsyncPost[SignUpRequest] { case (rh, request) =>
+  def signUp = jsonWithoutAuth[SignUpRequest] { case (rh, request) =>
     authenticationService.signUp(request.identifier,
       request.password,
       request.email,
@@ -35,7 +35,7 @@ class AuthenticationController @Inject()(components: ControllerComponents,
     }
   }
 
-  def signIn = jsonAsyncPost[SignInRequest] { case (rh, request) =>
+  def signIn = jsonWithoutAuth[SignInRequest] { case (rh, request) =>
     authenticationService.signInCredentials(request.credentials)(rh) map {
       case Left(CouldNotFindUser) => jsonFail(BadRequest)
       case Right(data: SignInResultData) => jsonOk(Token(token = data.token, expiresOn = data.expiresOn))

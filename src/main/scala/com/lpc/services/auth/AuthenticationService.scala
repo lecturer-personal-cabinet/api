@@ -89,21 +89,15 @@ class AuthenticationServiceImpl[F[_] : Monad] @Inject()(userService: UserService
 }
 
 object AuthenticationService {
-
   sealed trait SignUpSuccessResponse
-
   sealed trait SignUpFailedResponse
-
   sealed trait SignInSuccessResponse
-
   sealed trait SignInFailedResponse
 
   case class SignUpResultData(token: DefaultEnv#A#Value, expiresOn: DateTime) extends SignUpSuccessResponse
-
   case object AlreadyExists extends SignUpFailedResponse
 
   case class SignInResultData(token: DefaultEnv#A#Value, expiresOn: DateTime) extends SignInSuccessResponse
-
   case object CouldNotFindUser extends SignInFailedResponse
 
 }
