@@ -1,6 +1,6 @@
 package com.lpc.wiring
 
-import com.lpc.controllers.PingController
+import com.lpc.controllers.{PingController, AuthenticationController}
 import com.softwaremill.macwire.wire
 import controllers.AssetsComponents
 import play.api.ApplicationLoader.Context
@@ -15,9 +15,10 @@ class LpcApplicationLoader extends ApplicationLoader {
 }
 
 class LpcComponent (context: Context) extends BuiltInComponentsFromContext(context)
-  with GlobalModule
   with AssetsComponents
+  with SilhouetteModule
   with I18nComponents {
+
   LoggerConfigurator(context.environment.classLoader).foreach {
     _.configure(context.environment, context.initialConfiguration, Map.empty)
   }
@@ -27,7 +28,8 @@ class LpcComponent (context: Context) extends BuiltInComponentsFromContext(conte
     wire[Routes]
   }
 
-  val PingController: PingController = wire[PingController]
+  lazy val PingController: PingController = wire[PingController]
+  lazy val SignUpController: AuthenticationController = wire[AuthenticationController]
 
   override def httpFilters: Seq[EssentialFilter] = Seq.empty[EssentialFilter]
 }

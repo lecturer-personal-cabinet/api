@@ -1,1 +1,5 @@
-GET     /ping       com.lpc.controllers.PingController.ping
+GET     /ping                       com.lpc.controllers.PingController.ping
+GET     /auth/ping                  com.lpc.controllers.PingController.authPing
+
+POST    /signup                     com.lpc.controllers.AuthenticationController.signUp
+POST    /signin                     com.lpc.controllers.AuthenticationController.signIn
