@@ -14,13 +14,12 @@ class LpcController @Inject()(cc: ControllerComponents,
 
   def jsonOk() = jsonOkWithStatus(Ok)
   def jsonOk[R: Writes](r: R) = withCustomHeader(Ok(Json.toJson(r)))
-  def jsonOkWithStatus(status: Status) = withCustomHeader(status(Json.obj("status" -> "SUCCESS")))
+  def jsonOkWithStatus(status: Results#Status) = withCustomHeader(status(Json.obj("status" -> "SUCCESS")))
   def jsonOkWithNonconformingResponse[R: Writes](key: String, r: R) =
     withCustomHeader(Ok(Json.obj(key -> Json.toJson(r))))
-
-  def jsonFail(status: Status) = withCustomHeader(status(Json.obj("status" -> "FAILURE")))
-  def jsonFail(status: Status, message: String) = withCustomHeader(status(Json.obj("message" -> message)))
-  def jsonFail[R: Writes](status: Status, r: R) = withCustomHeader(status(Json.obj("message" -> Json.toJson(r))))
+  def jsonFail(status: Results#Status) = withCustomHeader(status(Json.obj("status" -> "FAILURE")))
+  def jsonFail(status: Results#Status, message: String) = withCustomHeader(status(Json.obj("message" -> message)))
+  def jsonFail[R: Writes](status: Results#Status, r: R) = withCustomHeader(status(Json.obj("message" -> Json.toJson(r))))
 
   def jsonWithAuth[BODY] = new {
     def apply(body: (Request[_], BODY) => Future[Result])
