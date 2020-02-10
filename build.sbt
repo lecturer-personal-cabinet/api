@@ -35,6 +35,8 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-persistence" % silhouetteVer,
 )
 
+libraryDependencies += filters
+
 lazy val api = (project in file("."))
   .enablePlugins(PlayScala)
   .disablePlugins(PlayLayoutPlugin)
